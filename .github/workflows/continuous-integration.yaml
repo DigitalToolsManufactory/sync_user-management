@@ -1,0 +1,36 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  # keep the following two variables in sync with the `cache-maven-dependencies` workflow
+  MVN_DEPENDENCIES_CACHE_KEY: maven-dependencies
+  MVN_DEPENDENCIES_CACHE_PATH: |
+    ~/.m2/repository/**
+    !~/.m2/repository/com/github/dtm/sync/usermanagement/**
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 21
+
+      - name: Restore Maven Dependencies
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.MVN_DEPENDENCIES_CACHE_KEY }}
+          path: ${{ env.MVN_DEPENDENCIES_CACHE_PATH }}
+
+      - name: Build
+        run: mvn clean install --no-transfer-progress

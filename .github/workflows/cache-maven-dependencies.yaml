@@ -1,0 +1,47 @@
+name: Cache Maven Dependencies
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '33 4 * * *'
+
+env:
+  CACHE_KEY: maven-dependencies
+  CACHE_REF: refs/heads/main
+  CACHE_PATH: |
+    ~/.m2/repository/**
+    !~/.m2/repository/com/github/dtm/sync/usermanagement/**
+
+jobs:
+  create-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 21
+
+      - name: Download Dependencies
+        run: mvn dependency:go-offline
+
+      - name: Delete Existing Caches
+        run: |
+          CACHE_IDS=$(gh cache list --key "${{ env.CACHE_KEY }}" --ref "${{ env.CACHE_REF }}" --json id | jq -r '.[] | .id')
+          for CACHE_ID in $CACHE_IDS; do
+              echo "Deleting cache with ID: $CACHE_ID"
+              gh cache delete "${CACHE_ID}"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.DTM_ADMIN }}
+
+      - name: Create Cache
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ env.CACHE_KEY }}
+          path: ${{ env.CACHE_PATH }}
