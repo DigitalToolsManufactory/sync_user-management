@@ -8,10 +8,7 @@ on:
 env:
   # keep the following two variables in sync with the `cache-maven-dependencies` workflow
   MVN_DEPENDENCIES_CACHE_KEY: maven-dependencies
-  MVN_DEPENDENCIES_CACHE_PATH: |
-    ~/.m2/repository/**
-    !~/.m2/repository/com/github/dtm/sync/usermanagement/**
-  
+  MVN_DEPENDENCIES_CACHE_PATH: ~/.m2/**
 
 jobs:
   build:

@@ -8,9 +8,7 @@ on:
 env:
   CACHE_KEY: maven-dependencies
   CACHE_REF: refs/heads/main
-  CACHE_PATH: |
-    ~/.m2/repository/**
-    !~/.m2/repository/com/github/dtm/sync/usermanagement/**
+  CACHE_PATH: ~/.m2/**
 
 jobs:
   create-cache:
