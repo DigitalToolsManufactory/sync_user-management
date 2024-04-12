@@ -15,6 +15,9 @@
 	<description>The user management service shared across the SYNC service family.</description>
 	<properties>
 		<java.version>21</java.version>
+
+		<skipCveScan>false</skipCveScan>
+		<updateCveDatabase>true</updateCveDatabase>
 	</properties>
 	<dependencies>
 		<!-- scope: compile -->
@@ -50,6 +53,25 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>9.0.10</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skip>${skipCveScan}</skip>
+					<skipProvidedScope>true</skipProvidedScope>
+					<failBuildOnCVSS>7</failBuildOnCVSS>
+					<suppressionFile>.etc/cve-suppressions.xml</suppressionFile>
+					<autoUpdate>${updateCveDatabase}</autoUpdate>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -68,6 +90,12 @@
 					<artifactId>h2</artifactId>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>local</id>
+			<properties>
+				<skipCveScan>true</skipCveScan>
+			</properties>
 		</profile>
 		<profile>
 			<id>prod</id>

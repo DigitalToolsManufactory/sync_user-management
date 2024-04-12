@@ -10,6 +10,10 @@ env:
   MVN_DEPENDENCIES_CACHE_KEY: maven-dependencies
   MVN_DEPENDENCIES_CACHE_PATH: ~/.m2/**
 
+  # keep the following two variables in sync with the `cache-cve-database` workflow
+  CVE_DATABASE_CACHE_KEY: cve-database
+  CVE_DATABASE_CACHE_PATH: ~/.m2/repository/org/owasp/dependency-check-data
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,5 +33,12 @@ jobs:
           key: ${{ env.MVN_DEPENDENCIES_CACHE_KEY }}
           path: ${{ env.MVN_DEPENDENCIES_CACHE_PATH }}
 
+      - name: Restore CVE Database
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.CVE_DATABASE_CACHE_KEY }}
+          path: ${{ env.CVE_DATABASE_CACHE_PATH }}
+          fail-on-cache-miss: true
+
       - name: Build
-        run: mvn clean install --no-transfer-progress
+        run: mvn clean install --no-transfer-progress -DupdateCveDatabase=false
